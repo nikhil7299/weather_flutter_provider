@@ -36,7 +36,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   http: ^0.13.5
-  hidable: ^1.0.3
   provider: ^6.0.5
   weather_icons: ^3.0.0
   geolocator: ^9.0.2
