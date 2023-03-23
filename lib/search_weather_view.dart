@@ -1,8 +1,5 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:provider/provider.dart';
 import 'package:weather/model/weather_book.dart';
 import 'package:weather/service/weather_service.dart';
 
@@ -15,6 +12,7 @@ class SearchWeatherView extends StatefulWidget {
 
 class _SearchWeatherViewState extends State<SearchWeatherView> {
   late final TextEditingController _searchController;
+  List<WeatherSearchItem> weathers = [];
   final weatherService = WeatherService();
 
   void dismissKeyboard() => FocusManager.instance.primaryFocus?.unfocus();
@@ -31,17 +29,19 @@ class _SearchWeatherViewState extends State<SearchWeatherView> {
     super.dispose();
   }
 
-  // void onPress() {
-  //   List<WeatherSearchItem> searchItems = weatherService.getWeatherSearch(_searchController.text);
-
-  // }
-  Future<List<WeatherSearchItem>> weatherSearch(String place) async {
-    return await weatherService.getWeatherSearch(searchTerm: place);
+  void getSearchData() async {
+    await weatherService
+        .getWeatherSearch(searchTerm: _searchController.text)
+        .then((value) => weathers = value);
+    // weathers.map((e) => print(e.name));
+    setState(() {});
+    // print(weathers);
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -99,7 +99,7 @@ class _SearchWeatherViewState extends State<SearchWeatherView> {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: getSearchData,
                 child: Row(
                   children: const [
                     Icon(
@@ -113,14 +113,55 @@ class _SearchWeatherViewState extends State<SearchWeatherView> {
               )
             ],
           ),
-          SizedBox(height: 30),
-          // FutureBuilder(
-          //   future: weatherSearch(_searchController.text),
-          //   builder:
-          // (context, snapshot) {
+          const SizedBox(height: 30),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: weathers.length,
+            itemBuilder: (context, index) {
+              return Container(
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(14)),
+                child: Column(children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Id: ${weathers.elementAt(index).id}"),
+                          SizedBox(
+                            width: size.width * 0.7,
+                            child: Text(
+                                "${weathers[index].name}  ${weathers.elementAt(index).region}",
+                                overflow: TextOverflow.ellipsis),
+                          ),
+                          Text(
+                              "Lat: ${weathers.elementAt(index).lat}  Lon: ${weathers.elementAt(index).lon}"),
+                        ],
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          var weatherSearchItems =
+                              Provider.of<WeatherBook>(context, listen: false);
+                          final weatherSearchItem = weathers.elementAt(index);
+                          weatherSearchItems.add(
+                              weatherSearchItem: weatherSearchItem);
 
-          // },
-          // ),
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text("Add"),
+                      ),
+                    ],
+                  )
+                ]),
+              );
+            },
+          )
         ],
       ),
     );

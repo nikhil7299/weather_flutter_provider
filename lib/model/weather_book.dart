@@ -1,58 +1,52 @@
-import 'dart:convert';
-
+import 'dart:collection';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import 'package:weather/model/weather_model.dart';
+class WeatherBook extends ChangeNotifier {
+  final List<WeatherSearchItem> _weatherSearchItems = [];
 
-class WeatherBook extends ValueNotifier<List<WeatherSearchItem>> {
-  WeatherBook._sharedInstance() : super([]);
-
-  static final WeatherBook _shared = WeatherBook._sharedInstance();
-
-  factory WeatherBook() => _shared;
-
-  int get length => value.length;
+  UnmodifiableListView<WeatherSearchItem> get items =>
+      UnmodifiableListView(_weatherSearchItems);
 
   void add({required WeatherSearchItem weatherSearchItem}) {
-    final weathers = value;
-    weathers.add(weatherSearchItem);
+    _weatherSearchItems.add(weatherSearchItem);
     notifyListeners();
   }
 
-  void remove({required WeatherSearchItem weatherSearchItem}) {
-    final weathers = value;
-    if (weathers.contains(weatherSearchItem)) {
-      weathers.remove(weatherSearchItem);
-      notifyListeners();
-    }
+  void remove({required double lat, required double lon}) {
+    _weatherSearchItems
+        .removeWhere((element) => element.lat == lat && element.lon == lon);
+    notifyListeners();
   }
 
-  WeatherSearchItem? weatherSearchItem({required int atIndex}) =>
-      value.length > atIndex ? value[atIndex] : null;
+  void reset() {
+    _weatherSearchItems.clear();
+    notifyListeners();
+  }
+
+  int get length => _weatherSearchItems.length;
 }
 
 class WeatherSearchItem {
-  final String id;
-  final String name;
-  final String region;
-  final String country;
+  final int? id;
+  final String? name;
+  final String? region;
+  final String? country;
   final double lat;
   final double lon;
-  final String url;
+  final String? url;
   WeatherSearchItem({
-    required this.id,
-    required this.name,
-    required this.region,
-    required this.country,
+    this.id,
+    this.name,
+    this.region,
+    this.country,
     required this.lat,
     required this.lon,
-    required this.url,
+    this.url,
   });
 
   factory WeatherSearchItem.fromJson(Map<String, dynamic> map) {
     return WeatherSearchItem(
-      id: map['id'] ?? '',
+      id: map['id']?.toInt() ?? 0,
       name: map['name'] ?? '',
       region: map['region'] ?? '',
       country: map['country'] ?? '',
@@ -61,4 +55,26 @@ class WeatherSearchItem {
       url: map['url'] ?? '',
     );
   }
+
+  @override
+  bool operator ==(covariant WeatherSearchItem other) =>
+      identical(this, other) ||
+      (id == other.id &&
+          name == other.name &&
+          region == other.region &&
+          country == other.country &&
+          lat == other.lat &&
+          lon == other.lon &&
+          url == other.url);
+
+  @override
+  int get hashCode => Object.hashAll([
+        id,
+        name,
+        region,
+        country,
+        lat,
+        lon,
+        url,
+      ]);
 }

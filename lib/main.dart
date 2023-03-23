@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 import 'package:weather/model/weather_book.dart';
 import 'package:weather/search_weather_view.dart';
 import 'package:weather/weather_view.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -12,42 +15,92 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Main',
-      themeMode: ThemeMode.dark,
-      darkTheme: ThemeData.dark(useMaterial3: true),
-      theme: ThemeData(useMaterial3: true),
-      home: const HomePage(),
-      routes: {
-        '/search-weather': (context) => const SearchWeatherView(),
-      },
+    return ChangeNotifierProvider(
+      create: (context) => WeatherBook(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Main',
+        themeMode: ThemeMode.dark,
+        darkTheme: ThemeData.dark(useMaterial3: true),
+        theme: ThemeData(useMaterial3: true),
+        home: const HomePage(),
+        routes: {
+          '/search-weather': (context) => const SearchWeatherView(),
+        },
+      ),
     );
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  Position? position;
+  LocationPermission? locationPermission;
+
+  Future<Position> determinePosition() async {
+    locationPermission = await Geolocator.checkPermission();
+    if (locationPermission == LocationPermission.denied) {
+      locationPermission = await Geolocator.requestPermission();
+      if (locationPermission == LocationPermission.denied) {
+        return Future.error("Location Permission denied");
+      }
+    }
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
+
+  void setPosition() async {
+    position = await determinePosition();
+    setState(() {});
+
+    print("Geolocation : $position");
+    return Future.delayed(const Duration(seconds: 5));
+  }
+
+  @override
+  void initState() {
+    setPosition();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: WeatherBook(),
+    return Consumer<WeatherBook>(
       builder: (context, value, child) {
-        final weathers = value;
-        // final weathers =c
         return DefaultTabController(
-          length: weathers.length,
+          length: value.items.length + 1,
           initialIndex: 0,
           child: Scaffold(
             body: TabBarView(
-              children: weathers
-                  .map((weatherSearchItem) => WeatherView(
-                        lat: weatherSearchItem.lat,
-                        lon: weatherSearchItem.lon,
-                      ))
-                  .toList(),
-              // children: cities.map((city) => WeatherView(city: city)).toList(),
+              children: [
+                    locationPermission == LocationPermission.denied ||
+                            locationPermission ==
+                                LocationPermission.deniedForever ||
+                            position == null
+                        ? const Center(
+                            child: Text(
+                                "Enable Location Permission from settings"),
+                          )
+                        : WeatherView(
+                            lat: position!.latitude,
+                            lon: position!.longitude,
+                            isRemovable: false,
+                          )
+                  ] +
+                  (value.items
+                      .map((weatherSearchItem) => WeatherView(
+                            lat: weatherSearchItem.lat,
+                            lon: weatherSearchItem.lon,
+                            isRemovable: true,
+                          ))
+                      .toList()),
             ),
             floatingActionButton: SizedBox(
               height: 40,
@@ -64,6 +117,7 @@ class HomePage extends StatelessWidget {
                     "Add City",
                   ),
                   onPressed: () async {
+                    // final defaultTabContext = DefaultTabController.of(context);
                     await Navigator.of(context).pushNamed('/search-weather');
                   },
                   shape: RoundedRectangleBorder(
@@ -91,26 +145,40 @@ class HomePage extends StatelessWidget {
                   color: Colors.deepPurple,
                   borderRadius: BorderRadius.circular(60),
                 ),
-                tabs: weathers
-                    .map(
-                      (weatherSearchItem) => Tab(
+                unselectedLabelColor: Colors.black87,
+                tabs: [
+                      Tab(
                         child: Row(
-                          children: [
-                            const Icon(
-                              Icons.person,
-                              size: 15,
-                            ),
-                            const SizedBox(width: 5),
+                          children: const [
+                            Icon(Icons.cloud_circle_rounded),
+                            SizedBox(width: 5),
                             Text(
-                              weatherSearchItem.name.toUpperCase(),
-                              style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w300),
+                              "Geolocation",
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w300),
                             ),
                           ],
                         ),
                       ),
-                    )
-                    .toList(),
+                    ] +
+                    value.items
+                        .map(
+                          (weatherSearchItem) => Tab(
+                            child: Row(
+                              children: [
+                                const Icon(Icons.cloud_circle_rounded),
+                                const SizedBox(width: 5),
+                                Text(
+                                  weatherSearchItem.name!.toUpperCase(),
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w300),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
               ),
             ),
           ),

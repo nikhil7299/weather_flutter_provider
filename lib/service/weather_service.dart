@@ -17,14 +17,14 @@ class WeatherService {
           Uri.http('api.weatherapi.com', '/v1/current.json', queryParameters);
       final response = await http.get(uri);
       // print("from geo");
-      print(response.body);
+      // print(response.body);
       if (response.statusCode == 200) {
         return Weather.fromJson(jsonDecode(response.body));
       } else {
         throw Exception("Can not get weather");
       }
     } catch (e) {
-      print(e);
+      // print(e);
       rethrow;
     }
   }
@@ -60,10 +60,10 @@ class WeatherService {
       final uri =
           Uri.http('api.weatherapi.com', '/v1/search.json', queryParameters);
       final response = await http.get(uri);
-      print(response.body);
+      // print(response.body);
       if (response.statusCode == 200) {
         Iterable list = json.decode(response.body);
-        print(list);
+        // print(list);
         List<WeatherSearchItem> weatherSearchItems =
             List<WeatherSearchItem>.from(
                 list.map((model) => WeatherSearchItem.fromJson(model)));
@@ -72,7 +72,7 @@ class WeatherService {
         throw Exception("Cannot get Search Results");
       }
     } catch (e) {
-      print(e);
+      // print(e);
       rethrow;
     }
   }
