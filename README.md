@@ -18,9 +18,9 @@ A weather app using Flutter with Provider State Management and WeatherApi.
      <td align="center">Search Cities</td>
   </tr>
   <tr>
-    <td><img src="screenshots/1.png" width=270></td>
-    <td><img src="screenshots/2.png" width=270></td>
-    <td><img src="screenshots/3.png" width=270></td>
+    <td><img src="screenshots/1.png" width=260></td>
+    <td><img src="screenshots/2.png" width=260></td>
+    <td><img src="screenshots/3.png" width=260></td>
   </tr>
  </table>
 
@@ -28,12 +28,12 @@ A weather app using Flutter with Provider State Management and WeatherApi.
   <tr>
     <td align="center">Multiple Weather Tabs</td>
      <td align="center">Refresh Indicator</td>
-     <td align="center">Remove City or All Cities except Geolocation Tab</td>
+     <td align="center">Remove City/ Cities except Geolocation </td>
   </tr>
   <tr>
-    <td><img src="screenshots/4.png" width=270></td>
-    <td><img src="screenshots/5.png" width=270></td>
-    <td><img src="screenshots/6.png" width=270></td>
+    <td><img src="screenshots/4.png" width=260></td>
+    <td><img src="screenshots/5.png" width=260></td>
+    <td><img src="screenshots/6.png" width=260></td>
   </tr>
  </table>
 
