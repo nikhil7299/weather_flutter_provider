@@ -8,8 +8,10 @@ class WeatherBook extends ChangeNotifier {
       UnmodifiableListView(_weatherSearchItems);
 
   void add({required WeatherSearchItem weatherSearchItem}) {
-    _weatherSearchItems.add(weatherSearchItem);
-    notifyListeners();
+    if (!_weatherSearchItems.contains(weatherSearchItem)) {
+      _weatherSearchItems.add(weatherSearchItem);
+      notifyListeners();
+    }
   }
 
   void remove({required double lat, required double lon}) {
