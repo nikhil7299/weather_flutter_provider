@@ -28,7 +28,7 @@ A weather app using Flutter with Provider State Management and WeatherApi.
   <tr>
     <td align="center">Multiple Weather Tabs</td>
      <td align="center">Refresh Indicator</td>
-     <td align="center">Remove City/ Cities except Geolocation </td>
+     <td align="center">Remove City/ Cities except Geolocation</td>
   </tr>
   <tr>
     <td><img src="screenshots/4.png" width=260></td>

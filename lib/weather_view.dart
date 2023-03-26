@@ -240,8 +240,9 @@ class _WeatherViewState extends State<WeatherView> {
                                         Provider.of<WeatherBook>(context,
                                             listen: false);
                                     weatherSearchItems.remove(
-                                        lat: snapshot.data!.lat,
-                                        lon: snapshot.data!.lon);
+                                      lat: snapshot.data!.lat,
+                                      lon: snapshot.data!.lon,
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     fixedSize: Size(
